@@ -12,11 +12,14 @@
 #define C_AZUL    "\x1b[34m"
 #define C_CIAN    "\x1b[36m"
 
-// --- ESTRUCTURAS Y CONSTANTES ---
+// --- ESTRUCTURAS Y CONSTANTES (Defines de preprocesador para tamaños de arrays) ---
 #define NUM_GRUPOS 12
 #define EQUIPOS_POR_GRUPO 4
 #define FIGURAS_POR_EQUIPO 20
-#define ARCHIVO_DAT "album.dat"
+
+// --- CONSTANTES GLOBALES REALES (Requisito del TP) ---
+const char ARCHIVO_DAT[] = "album.dat";
+const int MAX_TOP_RANKING = 10;
 
 typedef struct { int estado; } Figurita;
 typedef struct {
@@ -38,6 +41,7 @@ void guardarAlbum();
 void cargarAlbum();
 void mostrarResumen();
 void mostrarEstadisticas();
+void mostrarRankingEquipos(); // Nuevo Prototipo
 void cargarPorCodigo();
 void limpiarPantalla();
 void gestionarEquipoMenu(Equipo* eq);
@@ -101,6 +105,56 @@ void procesarEstadisticasEquipo(Equipo* eq, int* obtenidas, int* repetidas) {
             }
         }
     }
+}
+
+// NUEVA FUNCIÓN: Algoritmo de Ordenamiento Burbuja
+void mostrarRankingEquipos() {
+    // Aumentamos el tamaño en +1 para incluir a FWC
+    Equipo* ranking[(NUM_GRUPOS * EQUIPOS_POR_GRUPO) + 1];
+    int puntajes[(NUM_GRUPOS * EQUIPOS_POR_GRUPO) + 1];
+    int idx = 0;
+
+    // 1. Extraer todos los equipos normales al vector unidimensional
+    for (int i = 0; i < NUM_GRUPOS; i++) {
+        for (int j = 0; j < EQUIPOS_POR_GRUPO; j++) {
+            ranking[idx] = &album[i].equipos[j];
+            procesarEstadisticasEquipo(ranking[idx], &puntajes[idx], NULL);
+            idx++;
+        }
+    }
+
+    // 2. Extraer FWC y agregarlo al final del vector
+    ranking[idx] = &fwc;
+    procesarEstadisticasEquipo(ranking[idx], &puntajes[idx], NULL);
+    idx++; // idx ahora tiene el total real de equipos (49)
+
+    // 3. ALGORITMO DE ORDENAMIENTO (Burbuja - Bubble Sort)
+    // Se ordena de mayor a menor (descendente)
+    for (int i = 0; i < idx - 1; i++) {
+        for (int j = 0; j < idx - i - 1; j++) {
+            if (puntajes[j] < puntajes[j + 1]) {
+                // Intercambiar puntajes
+                int tempP = puntajes[j];
+                puntajes[j] = puntajes[j + 1];
+                puntajes[j + 1] = tempP;
+
+                // Intercambiar punteros a los equipos
+                Equipo* tempE = ranking[j];
+                ranking[j] = ranking[j + 1];
+                ranking[j + 1] = tempE;
+            }
+        }
+    }
+
+    // 4. Imprimir el Top ordenado usando la constante global MAX_TOP_RANKING
+    limpiarPantalla();
+    printf("\n" C_CIAN "--- TOP %d: RANKING DE COMPLETADO ---" C_RESET "\n", MAX_TOP_RANKING);
+    for (int i = 0; i < MAX_TOP_RANKING; i++) {
+        float pct = ((float)puntajes[i] / FIGURAS_POR_EQUIPO) * 100;
+        printf(" %2d. %-20s (%s) -> " C_AMARILLO "%6.2f%%" C_RESET "\n", i + 1, ranking[i]->nombre, ranking[i]->codigo, pct);
+    }
+    printf(C_CIAN "============================================" C_RESET "\n\n");
+    system("pause");
 }
 
 void mostrarEstadisticas() {
@@ -298,7 +352,7 @@ int main() {
         mostrarEstadisticas();
 
         printf("\n" C_CIAN "--- MENU PRINCIPAL ---" C_RESET "\n");
-        printf(" [A-L] Seleccionar Grupo\n [W]   Institucionales (FWC)\n [4]   Borrar Album\n [5]   Carga Manual\n [6]   Ver Historial\n [7]   Borrar Historial\n [0]   Salir\n Opcion: ");
+        printf(" [A-L] Seleccionar Grupo\n [W]   Institucionales (FWC)\n [4]   Borrar Album\n [5]   Carga Manual\n [6]   Ver Historial\n [7]   Borrar Historial\n [8]   Ver Ranking\n [0]   Salir\n Opcion: ");
 
         char inputBuffer[10];
         fgets(inputBuffer, sizeof(inputBuffer), stdin);
@@ -339,7 +393,6 @@ int main() {
             continue;
         }
 
-        // --- NUEVA OPCION PARA BORRAR EL LOG ---
         if (input == '7') {
             printf(C_ROJO " Seguro que deseas borrar el historial de movimientos? (S/N): " C_RESET);
             char conf; scanf_s(" %c", &conf, 1); getchar();
@@ -352,6 +405,12 @@ int main() {
                 }
                 system("pause");
             }
+            continue;
+        }
+
+        // --- NUEVA OPCION PARA VER RANKING ---
+        if (input == '8') {
+            mostrarRankingEquipos();
             continue;
         }
 
