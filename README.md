@@ -1,4 +1,4 @@
-# Gestor de Álbum de Figuritas (C)
+# Gestor de Álbum de Figuritas (C) - By Lucas Lasciarrea
 
 Este programa es una herramienta de terminal desarrollada en C para gestionar el inventario y progreso de un álbum de figuritas. Permite llevar un control detallado de las figuritas obtenidas, repetidas, y generar estadísticas de completado.
 
