@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <time.h> 
+#include <windows.h> // <-- NUEVA LIBRERIA PARA LA ANIMACION (Sleep)
 
 // --- CODIGOS DE COLOR ANSI ---
 #define C_RESET   "\x1b[0m"
@@ -16,6 +17,7 @@
 #define NUM_GRUPOS 12
 #define EQUIPOS_POR_GRUPO 4
 #define FIGURAS_POR_EQUIPO 20
+#define FIGURAS_POR_SOBRE 5
 
 // --- CONSTANTES GLOBALES REALES (Requisito del TP) ---
 const char ARCHIVO_DAT[] = "album.dat";
@@ -41,12 +43,13 @@ void guardarAlbum();
 void cargarAlbum();
 void mostrarResumen();
 void mostrarEstadisticas();
-void mostrarRankingEquipos(); // Nuevo Prototipo
+void mostrarRankingEquipos();
 void cargarPorCodigo();
 void limpiarPantalla();
 void gestionarEquipoMenu(Equipo* eq);
 void registrarMovimiento(const char* codigoEquipo, int numero, const char* accion);
 int leerEntero();
+void simularAperturaSobre();
 
 // Funciones Helper (Optimizacion)
 Equipo* buscarEquipo(const char* codigo);
@@ -107,14 +110,11 @@ void procesarEstadisticasEquipo(Equipo* eq, int* obtenidas, int* repetidas) {
     }
 }
 
-// NUEVA FUNCIÓN: Algoritmo de Ordenamiento Burbuja
 void mostrarRankingEquipos() {
-    // Aumentamos el tamaño en +1 para incluir a FWC
     Equipo* ranking[(NUM_GRUPOS * EQUIPOS_POR_GRUPO) + 1];
     int puntajes[(NUM_GRUPOS * EQUIPOS_POR_GRUPO) + 1];
     int idx = 0;
 
-    // 1. Extraer todos los equipos normales al vector unidimensional
     for (int i = 0; i < NUM_GRUPOS; i++) {
         for (int j = 0; j < EQUIPOS_POR_GRUPO; j++) {
             ranking[idx] = &album[i].equipos[j];
@@ -123,22 +123,17 @@ void mostrarRankingEquipos() {
         }
     }
 
-    // 2. Extraer FWC y agregarlo al final del vector
     ranking[idx] = &fwc;
     procesarEstadisticasEquipo(ranking[idx], &puntajes[idx], NULL);
-    idx++; // idx ahora tiene el total real de equipos (49)
+    idx++;
 
-    // 3. ALGORITMO DE ORDENAMIENTO (Burbuja - Bubble Sort)
-    // Se ordena de mayor a menor (descendente)
     for (int i = 0; i < idx - 1; i++) {
         for (int j = 0; j < idx - i - 1; j++) {
             if (puntajes[j] < puntajes[j + 1]) {
-                // Intercambiar puntajes
                 int tempP = puntajes[j];
                 puntajes[j] = puntajes[j + 1];
                 puntajes[j + 1] = tempP;
 
-                // Intercambiar punteros a los equipos
                 Equipo* tempE = ranking[j];
                 ranking[j] = ranking[j + 1];
                 ranking[j + 1] = tempE;
@@ -146,7 +141,6 @@ void mostrarRankingEquipos() {
         }
     }
 
-    // 4. Imprimir el Top ordenado usando la constante global MAX_TOP_RANKING
     limpiarPantalla();
     printf("\n" C_CIAN "--- TOP %d: RANKING DE COMPLETADO ---" C_RESET "\n", MAX_TOP_RANKING);
     for (int i = 0; i < MAX_TOP_RANKING; i++) {
@@ -343,7 +337,65 @@ void gestionarEquipoMenu(Equipo* eq) {
     }
 }
 
+// --- FUNCION MEJORADA CON ANIMACION ---
+void simularAperturaSobre() {
+    limpiarPantalla();
+    printf("\n" C_CIAN "--- ABRIENDO SOBRE (%d Figuritas) ---" C_RESET "\n\n", FIGURAS_POR_SOBRE);
+
+    for (int i = 0; i < FIGURAS_POR_SOBRE; i++) {
+        int equipoIndex = rand() % 49;
+        int figuraIndex = rand() % FIGURAS_POR_EQUIPO;
+
+        Equipo* eqAsignado = NULL;
+
+        if (equipoIndex == 48) {
+            eqAsignado = &fwc;
+        }
+        else {
+            int g_idx = equipoIndex / EQUIPOS_POR_GRUPO;
+            int e_idx = equipoIndex % EQUIPOS_POR_GRUPO;
+            eqAsignado = &album[g_idx].equipos[e_idx];
+        }
+
+        eqAsignado->figuras[figuraIndex].estado++;
+
+        // --- ANIMACION DE SUSPENSO ---
+        printf(" Carta %d: ", i + 1);
+        fflush(stdout); // Fuerzo la salida del texto a consola antes de pausar
+        Sleep(600);     // Pauso 600ms
+
+        printf(". ");
+        fflush(stdout);
+        Sleep(400);     // Pauso 400ms
+
+        printf(". ");
+        fflush(stdout);
+        Sleep(400);     // Pauso 400ms
+
+        // Mostrar resultado final de la carta
+        if (eqAsignado->figuras[figuraIndex].estado == 1) {
+            printf(C_VERDE "[NUEVA]" C_RESET "    %-20s (%s) - Figura #%d\n",
+                eqAsignado->nombre, eqAsignado->codigo, figuraIndex + 1);
+        }
+        else {
+            printf(C_AZUL "[REPETIDA]" C_RESET " %-20s (%s) - Figura #%d\n",
+                eqAsignado->nombre, eqAsignado->codigo, figuraIndex + 1);
+        }
+
+        registrarMovimiento(eqAsignado->codigo, figuraIndex + 1, "SOBRE");
+
+        // Pausa extra antes de empezar con la siguiente carta para que se aprecie
+        Sleep(500);
+    }
+
+    guardarAlbum();
+    printf("\n" C_AMARILLO ">> Sobre abierto y guardado en el album con exito!" C_RESET "\n\n");
+    system("pause");
+}
+
 int main() {
+    srand((unsigned int)time(NULL));
+
     cargarAlbum();
 
     while (1) {
@@ -352,7 +404,7 @@ int main() {
         mostrarEstadisticas();
 
         printf("\n" C_CIAN "--- MENU PRINCIPAL ---" C_RESET "\n");
-        printf(" [A-L] Seleccionar Grupo\n [W]   Institucionales (FWC)\n [4]   Borrar Album\n [5]   Carga Manual\n [6]   Ver Historial\n [7]   Borrar Historial\n [8]   Ver Ranking\n [0]   Salir\n Opcion: ");
+        printf(" [A-L] Seleccionar Grupo\n [W]   Institucionales (FWC)\n [4]   Borrar Album\n [5]   Carga Manual\n [6]   Ver Historial\n [7]   Borrar Historial\n [8]   Ver Ranking\n [9]   Abrir un Sobre\n [0]   Salir\n Opcion: ");
 
         char inputBuffer[10];
         fgets(inputBuffer, sizeof(inputBuffer), stdin);
@@ -408,9 +460,13 @@ int main() {
             continue;
         }
 
-        // --- NUEVA OPCION PARA VER RANKING ---
         if (input == '8') {
             mostrarRankingEquipos();
+            continue;
+        }
+
+        if (input == '9') {
+            simularAperturaSobre();
             continue;
         }
 
