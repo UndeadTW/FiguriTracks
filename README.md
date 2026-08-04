@@ -1,5 +1,6 @@
 
 **--------------------------------------------------------------**
+
 **Simulador de Álbum de Figuritas**
 
 **Autor:** Lucas Lasciarrea  
