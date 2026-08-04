@@ -1,53 +1,78 @@
-# Gestor de Álbum de Figuritas (C) - By Lucas Lasciarrea
+===========================================================================
+                      SIMULADOR DE ÁLBUM DE FIGURITAS
+===========================================================================
+Autor: Lucas Lasciarrea
+Institución: Universidad Abierta Interamericana (UAI)
+Carrera: Ingeniería en Sistemas Informáticos
+Materia: Introducción a los Algoritmos y la Programación
+Año: 2026
+===========================================================================
 
-Este programa es una herramienta de terminal desarrollada en C para gestionar el inventario y progreso de un álbum de figuritas. Permite llevar un control detallado de las figuritas obtenidas, repetidas, y generar estadísticas de completado.
+1. ¿QUÉ ES EL PROGRAMA?
+-----------------------
+Este programa es un simulador interactivo de un álbum de figuritas escrito 
+íntegramente en C. Permite gestionar una colección completa de equipos, 
+simulando la experiencia real de abrir sobres, conseguir figuritas nuevas, 
+y acumular repetidas. 
 
-## Características Principales
+El sistema cuenta con persistencia de datos (guarda el progreso en un 
+archivo binario para no perder la colección al cerrar el programa) y un 
+registro (log) de todos los movimientos realizados. Entre sus funciones 
+principales se destacan:
+- Gestión y visualización de grupos y equipos.
+- Apertura simulada de sobres con animaciones de consola.
+- Estadísticas de completado en tiempo real.
+- Ranking de los equipos más completos (ordenados algorítmicamente).
+- Carga manual de figuritas mediante códigos de equipo.
 
-* **Gestión por Grupos:** Estructura organizada de la A a la L, con soporte para 4 equipos por grupo y 20 figuritas por equipo.
-* **Sección Institucional (FWC):** Módulo dedicado para figuritas especiales (FWC), con su propia gestión y conteo.
-* **Interfaz Visual Dinámica:** Uso de códigos ANSI para colorear la consola (ej. verde para figuritas OK, rojo para faltantes, azul para repetidas).
-* **Estadísticas en Tiempo Real:** Cálculo automático del porcentaje de progreso tanto a nivel de equipo como a nivel global del álbum.
-* **Ranking Top 10:** Algoritmo de ordenamiento integrado para visualizar rápidamente las selecciones con mayor porcentaje de completado.
-* **Simulación de Sobres:** Generación aleatoria de sobres de 5 figuritas. Incluye un modo individual con animación de suspenso y un modo de apertura masiva para evaluar rápidamente la probabilidad y gestión de repetidas.
-* **Sistema de Auditoría (Logs):** Registro automático de cada movimiento realizado (sumas, eliminaciones, vaciados, aperturas de sobres) con fecha y hora exacta en `historial.log`.
-* **Persistencia de Datos:** El progreso se guarda automáticamente en `album.dat` tras cada cambio.
 
-## Instalación y Ejecución
+2. ¿CÓMO SE COMPILA?
+-----------------------
+Este código hace uso de librerías nativas de Windows (<windows.h>) para 
+las animaciones y funciones de cadena/archivos seguras estándar de 
+Microsoft (como `fopen_s` y `strcpy_s`). 
 
-1. **Requisitos:** Un compilador de C compatible con Windows (como MinGW o MSVC) para ejecutar funciones nativas como `system("cls")`, `fopen_s`, `system("notepad ...")` y funciones de tiempo de `<windows.h>`.
-2. **Compilación:** Compila el archivo fuente utilizando tu entorno de preferencia.
-   * Ejemplo: `gcc main.c -o album.exe`
-3. **Ejecución:** Simplemente ejecuta el archivo generado `.exe`.
+Entorno recomendado: Visual Studio (MSVC)
 
-## Guía de Menú
+Pasos para compilar en Visual Studio:
+1. Crear un nuevo proyecto vacío de consola en C++.
+2. Cambiar la extensión del archivo de origen de .cpp a .c para compilar 
+   estrictamente en C.
+3. Pegar el código fuente en el archivo .c.
+4. Presionar "Compilar" (Build) o F5 para ejecutar.
 
-| Tecla | Acción |
-| :--- | :--- |
-| **A-L** | Acceder a la gestión de figuritas de un grupo específico. |
-| **W** | Gestionar figuritas Institucionales (FWC). |
-| **4** | Borrar todo el álbum (requiere confirmación). |
-| **5** | Carga manual rápida mediante código de equipo. |
-| **6** | Ver historial de movimientos (abre el log en Bloc de Notas). |
-| **7** | Borrar el historial de movimientos (requiere confirmación). |
-| **8** | Ver Ranking Top 10 de equipos más completos. |
-| **9** | Simular apertura de sobres (permite elegir cantidad para animaciones individuales o aperturas masivas). |
-| **0** | Salir del programa. |
+Nota para usuarios de GCC/MinGW: 
+Si se desea compilar por consola usando GCC, es posible que el compilador 
+no reconozca `fopen_s` o `strcpy_s` de forma predeterminada sin las flags 
+adecuadas, ya que son extensiones seguras (C11 bounds-checking interfaces).
 
-## Estructura de Archivos
 
-* `album.dat`: Archivo binario donde se guarda todo tu progreso. No modificar manualmente.
-* `historial.log`: Archivo de texto plano que registra cada acción del usuario. Se actualiza automáticamente.
+3. ¿CÓMO SE USA?
+-----------------------
+Al ejecutar el programa, se mostrará un resumen general del álbum y las 
+estadísticas actuales. Debajo aparecerá el Menú Principal, el cual se 
+controla ingresando letras o números según la opción deseada y presionando 
+ENTER.
 
-## Notas Técnicas
+Opciones del Menú:
+- [A-L] Seleccionar Grupo: Permite entrar a un grupo específico para ver 
+  sus equipos y luego ingresar a uno para gestionar sus figuritas 
+  individualmente (sumar, restar, o vaciar el equipo).
+- [W] Institucionales: Acceso directo a las figuritas especiales (FWC).
+- [4] Borrar Álbum: Reinicia por completo el progreso de la colección.
+- [5] Carga Manual: Permite ingresar el código de un equipo (ej. "ARG") y 
+  el número de la figurita (1-20) para cargarla directamente.
+- [6] Ver Historial: Abre el bloc de notas de Windows para mostrar el 
+  archivo "historial.log" con el registro de todo lo que pasó en la sesión.
+- [7] Borrar Historial: Limpia el archivo log de movimientos.
+- [8] Ver Ranking: Muestra el Top 10 de los equipos con mayor porcentaje de 
+  completado, ordenados de mayor a menor.
+- [9] Abrir un Sobre: Simula la apertura de un sobre de 5 figuritas, 
+  indicando cuáles son nuevas y cuáles repetidas con indicadores de color.
+- [0] Salir: Cierra el programa de forma segura.
 
-* **Optimización:** El código utiliza estructuras de datos (`struct`) para la organización y punteros para la navegación eficiente en la memoria, minimizando la redundancia en los bucles de cálculo.
-* **Probabilidad y Aleatoriedad:** La simulación de sobres utiliza la semilla `srand(time(NULL))` para garantizar resultados dinámicos y realistas en la obtención de nuevas figuritas y repetidas.
-* **Compatibilidad:** Diseñado específicamente para entornos Windows debido al uso de comandos de sistema nativos para la limpieza de pantalla, edición de logs y la librería `<windows.h>` para las pausas de animación (`Sleep`).
-
----
-## Autor
-**Lucas Lasciarrea**  
-Estudiante de Ingeniería en Sistemas (UAI) | Informático Técnico  
-
-*Desarrollado para seguimiento local eficiente y alta disponibilidad de datos.*
+Archivos generados:
+- album.dat: Archivo binario creado automáticamente donde se guarda el 
+  progreso del usuario.
+- historial.log: Archivo de texto que registra fecha, hora y acción de 
+  cada modificación en el álbum.
