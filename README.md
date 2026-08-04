@@ -33,10 +33,11 @@ Este código hace uso de librerías nativas de Windows (`<windows.h>`) para las 
 **Entorno recomendado:** Visual Studio (MSVC)
 
 ### Pasos para compilar en Visual Studio:
-1. Crear un nuevo proyecto vacío de consola en C++.
-2. Cambiar la extensión del archivo de origen de `.cpp` a `.c` para compilar estrictamente en C.
-3. Pegar el código fuente en el archivo `.c`.
-4. Presionar **Compilar** (Build) o `F5` para ejecutar.
+1. Abrir proyecto solución (.sln) desde Visual Studio 2022.
+2. Acceder al proyecto "FiguriTracks" desde el explorador de soluciones.
+3. Acceder a la carpeta: "Archivos de Origen".
+4. Entrar al archivo main.cpp.
+5. Correr el codigo normalmente (Ctrl + F5).
 
 > **Nota para usuarios de GCC/MinGW:** Si se desea compilar por consola usando GCC, es posible que el compilador no reconozca `fopen_s` o `strcpy_s` de forma predeterminada sin las flags adecuadas, ya que son extensiones seguras (C11 bounds-checking interfaces).
 
@@ -57,6 +58,6 @@ Al ejecutar el programa, se mostrará un resumen general del álbum y las estad�
 *   **[9] Abrir un Sobre:** Simula la apertura de un sobre de 5 figuritas, indicando cuáles son nuevas y cuáles repetidas con indicadores de color.
 *   **[0] Salir:** Cierra el programa de forma segura.
 
-### Archivos generados:
+### Archivos que acompañan al main:
 *   **album.dat:** Archivo binario creado automáticamente donde se guarda el progreso del usuario.
 *   **historial.log:** Archivo de texto que registra fecha, hora y acción de cada modificación en el álbum.
